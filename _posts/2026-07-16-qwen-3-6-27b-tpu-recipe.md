@@ -9,9 +9,15 @@ categories: ai-infra
 
 # What problem are we solving?
 
-Gartner recently published compelling research outlining that enterprises are spending somewhere between $200-$500 per developer per month on coding agents, and in some cases, exceeding $2,000 a month per dev. The types of tasks executed by developers on their agentic harnesses range from single-file autocompletion, to multi-file feature implementations, to remotely-monitored, autonomously-executed, long-running experiments around the clock. While developers are clearly significantly more productive with closely-monitored usage of coding agents, CFOs and CTOs are asking the hard question around Return-on-Investment (ROI). If you have to budget an extra 30-50% cost per dev in your product roadmap, it may overturn the business case behind the upcoming feature releases altogether. With this dilemma in mind, teams are looking to preserve their productivity and output quality while looking for off-ramps on cost.
+Gartner recently published compelling research outlining that enterprises are spending somewhere between $200-$500 per developer per month on coding agents, and in some cases, exceeding $2,000 a month per dev. The types of tasks executed by developers on their agentic harnesses range from single-file autocompletion, to multi-file feature implementations, to remotely-monitored, autonomously-executed, long-running experiments around the clock.
 
-With this context in mind, this blog focuses on enabling Qwen 3.6 27B, a highly performant SOTA 27B dense open-source model from Alibaba, optimized for coding tasks. Qwen 3.6 27B scores a 77% on SWE-Bench-Verified, which puts it within punching distance of Claude-Opus-4.5 (at 81% on SWE-Bench-Verified). The dense architecture makes it easy to deploy and maintain for smaller AI infrastructure teams, and there are widely available public optimizations to make this model excel at agentic code generation (more on this later!). Given the demand on latest generation GPUs and TPUs, this endeavor also focuses on enabling Qwen 3.6 27B on TPU v6e—highlighting the fact that older generation AI accelerators when combined with SOTA models can actually win in the performance-per-dollar frontier. Lastly, this blog goes one step further beyond an optimized serving recipe to showcase integration with an open-source coding harness (e.g. Pi)—lighting up the end-to-end path for implementation. Before we dive into the details, and to unbury the lede, this configuration can easily provide 10-15x cost savings compared to closed-source alternatives, enabling businesses to re-focus on revenue growth with product development vs. staying mired in cost anxiety.
+While developers are clearly significantly more productive with closely-monitored usage of coding agents, CFOs and CTOs are asking the hard question around Return-on-Investment (ROI). If you have to budget an extra 30-50% cost per dev in your product roadmap, it may overturn the business case behind the upcoming feature releases altogether. With this dilemma in mind, teams are looking to preserve their productivity and output quality while looking for off-ramps on cost.
+
+With this context in mind, this blog focuses on enabling Qwen 3.6 27B, a highly performant SOTA 27B dense open-source model from Alibaba, optimized for coding tasks. Qwen 3.6 27B scores a 77% on SWE-Bench-Verified, which puts it within punching distance of Claude-Opus-4.5 (at 81% on SWE-Bench-Verified). The dense architecture makes it easy to deploy and maintain for smaller AI infrastructure teams, and there are widely available public optimizations to make this model excel at agentic code generation (more on this later!).
+
+Given the demand on latest generation GPUs and TPUs, this endeavor also focuses on enabling Qwen 3.6 27B on TPU v6e—highlighting the fact that older generation AI accelerators when combined with SOTA models can actually win in the performance-per-dollar frontier. Lastly, this blog goes one step further beyond an optimized serving recipe to showcase integration with an open-source coding harness (e.g. Pi)—lighting up the end-to-end path for implementation.
+
+Before we dive into the details, and to unbury the lede, this configuration can easily provide 10-15x cost savings compared to closed-source alternatives, enabling businesses to re-focus on revenue growth with product development vs. staying mired in cost anxiety.
 
 ---
 
@@ -20,10 +26,14 @@ With this context in mind, this blog focuses on enabling Qwen 3.6 27B, a highly 
 For this recipe (available in full in our [qwen3.6-27b-tpu-recipe repository](https://github.com/jawadaminGOOG/qwen3.6-27b-tpu-recipe)), we start by picking Qwen 3.6 27B (the FP8 rendition). As stated earlier, there are three primary reasons behind this choice:
 
 * **(a) Dense Model Sizing & Deployment Flexibility:** This dense model at its sizing, particularly in FP8, is easy to deploy, maintain, and post-train—offering engineering teams flexibility and freedom to explore.
+
 * **(b) High Agentic Capability:** This model punches above its weight class in terms of agentic ability and instruction following as it pertains to SWE tasks, as evidenced by where it ranks in SWE-Bench compared to other higher weight-class models.
+
 * **(c) Ecosystem Adoption:** This model has had a lot of traction in public domains, leading to an abundance of serving and orchestration templates/hooks etc. which will make our effort more efficient.
 
-In terms of the hardware and inference serving stack, we focus on an acceptable-latency, throughput-optimized recipe running on TPU v6e. This approach is (a) to get around the demand of latest generation TPUs (e.g. TPU v7x) and GPUs (e.g. Blackwell), and (b) to achieve the most efficient performance-per-dollar frontier given price relief on older generations with every latest AI accelerator generation being released. We choose a 4-chip, chip-to-chip interconnected topology of TPU v6e chips with a storage disk for persistent model weight storage. We orchestrate via GKE ([gke-base-infra](https://github.com/jawadaminGOOG/qwen3.6-27b-tpu-recipe/tree/main/gke-base-infra)) and leverage vLLM for an optimized inference engine.
+In terms of the hardware and inference serving stack, we focus on an acceptable-latency, throughput-optimized recipe running on TPU v6e. This approach is (a) to get around the demand of latest generation TPUs (e.g. TPU v7x) and GPUs (e.g. Blackwell), and (b) to achieve the most efficient performance-per-dollar frontier given price relief on older generations with every latest AI accelerator generation being released. 
+
+We choose a 4-chip, chip-to-chip interconnected topology of TPU v6e chips with a storage disk for persistent model weight storage. We orchestrate via GKE ([gke-base-infra](https://github.com/jawadaminGOOG/qwen3.6-27b-tpu-recipe/tree/main/gke-base-infra)) and leverage vLLM for an optimized inference engine.
 
 ---
 
@@ -32,12 +42,18 @@ In terms of the hardware and inference serving stack, we focus on an acceptable-
 It is important to spend some time highlighting the key optimizations for serving that we employed in this recipe (see the deployment manifests in [qwen-optimized-serving](https://github.com/jawadaminGOOG/qwen3.6-27b-tpu-recipe/tree/main/qwen-optimized-serving)). These are discussed below:
 
 * **(a) FP8 Weights and FP8 KV Cache:** We compressed both the weights and the KV cache tokens to 8-bit precision in HBM, enabling maximum concurrency capacity (i.e. number of developers) and context headroom (i.e. code/instruction size) for our TPU chips. FP8 compression for this class of models leads to <1% degradation in accuracy (ranging from 0.2% to 0.8% in major benchmarks).
+
 * **(b) Tensor Parallelism = 4 (Splitting Model Across 4 Chips):** We evenly shared the 27B dense model across all 4 chips of the TPU v6e-4 node over low-latency Inter-Chip Interconnect (ICI). This enables us to free up more High-Bandwidth Memory (HBM) for larger KV caches (enabling larger context lengths and more concurrency)—and the ICI connectivity ensures that we don't pay a large penalty with communication overhead across chips during `AllGather` and `ReduceScatter` collectives.
+
 * **(c) Prefix Caching:** We share KV cache blocks across identical prompt prefixes (e.g. system instructions, code imports, common codebase context etc.)—allowing us to reduce Time-to-First-Token (TTFT) by >80% for multi-turn agentic coding. This has two implications: giving developers a snappy experience when interacting with their coding agents, and capitalizing on the fact that agentic workloads with large context and tool outputs typically carry large repeated contexts forward at each turn.
+
 * **(d) Chunked Prefill:** We chunk large prompt prefills into smaller stages so that long input requests do not stall active token generation streams, allowing us to serve more developers with a reasonable inter-token latency (ITL).
+
 * **(e) Language Model Only Mode:** We disable multimodal image/video feature extractors, freeing memory and compute pipelines to focus solely on text/code.
 
-In order to test our serving performance, we leverage two benchmarks—one for medium context tasks (such as inline completion, single file assistance, class/method completions), and one for long context tasks (for multi-file feature implementations, extended call stack debugging, and long conversation histories). With the medium context benchmark (6.4k input tokens), we evaluate fast TTFT and ITL (perceived by developers as token streaming speeds); while the long context benchmark evaluates KV cache performance under heavy prefill pressure. Below are the results across these two types of workloads with a concurrency set to 120 streams/developers.
+In order to test our serving performance, we leverage two benchmarks—one for medium context tasks (such as inline completion, single file assistance, class/method completions), and one for long context tasks (for multi-file feature implementations, extended call stack debugging, and long conversation histories). 
+
+With the medium context benchmark (6.4k input tokens), we evaluate fast TTFT and ITL (perceived by developers as token streaming speeds); while the long context benchmark evaluates KV cache performance under heavy prefill pressure. Below are the results across these two types of workloads with a concurrency set to 120 streams/developers.
 
 ### Performance at 120 Concurrency (TPU v6e-4, TP=4)
 
@@ -49,7 +65,9 @@ In order to test our serving performance, we leverage two benchmarks—one for m
 ### Key Operational Takeaways
 
 1. **Sub-Second TTFT at Scale:** Both short and long context workloads maintain sub-second Time-To-First-Token (**503ms–827ms**), significantly enriching developer responsiveness.
+
 2. **Blazing Output Throughput (1,100–1,500 tok/s):** Generating ~1,500 tokens per second equates to roughly **1,125 words per second**—vastly outpacing human reading speed.
+
 3. **High Request Processing (4–6 req/s):** Processing 4 to 6 requests per second per node easily exceeds the typical human pacing requirement (where developers review code and formulate follow-ups every 15–20 seconds). This allows high developer density per TPU node without queuing lag.
 
 ---
