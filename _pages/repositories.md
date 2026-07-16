@@ -2,9 +2,9 @@
 layout: page
 permalink: /repositories/
 title: repositories
-description: Public GitHub repositories and projects.
+description: Public GitHub repositories and projects. View all repositories directly on [GitHub](https://github.com/jawadaminGOOG?tab=repositories).
 nav: true
-nav_order: 3
+nav_order: 2
 ---
 
 {% if site.data.repositories.github_users %}
