@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Deploying a Code Harness with Qwen 3.6 27B on TPUs: 15X Cost Improvement over closed-source alternatives"
-date: 2026-07-16 13:00:00
+date: 2026-07-16
 description: "Notes, setup recipes, and commentary on serving Qwen 3.6 27B on Cloud TPUs and integrating with an agentic harness."
 tags: tpu qwen llm benchmark google-cloud
 categories: ai-infra
