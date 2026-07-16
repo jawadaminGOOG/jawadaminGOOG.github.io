@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>{{ page.title }} | {{ site.title }}</title>
+    <meta name="description" content="{{ page.description | default: site.description }}">
+
+    <link rel="stylesheet" href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}">
+    
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        color: #24292e;
+        background-color: #ffffff;
+        line-height: 1.6;
+      }
+      .site-header {
+        border-bottom: 1px solid #e1e4e8;
+        padding: 16px 24px;
+        background: #fafbfc;
+      }
+      .site-header-inner {
+        max-width: 800px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .site-title {
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: #0366d6;
+        text-decoration: none;
+      }
+      .site-title:hover {
+        text-decoration: underline;
+      }
+      .main-content {
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 0 24px;
+      }
+      .post-header {
+        margin-bottom: 32px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #eaecef;
+      }
+      .post-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-top: 0;
+        margin-bottom: 8px;
+        line-height: 1.25;
+        color: #1a1a1a;
+      }
+      .post-meta {
+        font-size: 0.95rem;
+        color: #586069;
+      }
+      .post-content h2 {
+        border-bottom: 1px solid #eaecef;
+        padding-bottom: 8px;
+        margin-top: 36px;
+      }
+      .post-content pre {
+        background-color: #f6f8fa;
+        border-radius: 6px;
+        padding: 16px;
+        overflow: auto;
+      }
+      .post-content code {
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+        font-size: 85%;
+        background-color: rgba(27,31,35,0.05);
+        padding: 0.2em 0.4em;
+        border-radius: 3px;
+      }
+      .post-content pre code {
+        background-color: transparent;
+        padding: 0;
+      }
+      .post-footer {
+        max-width: 800px;
+        margin: 60px auto 40px;
+        padding: 24px 24px 0;
+        border-top: 1px solid #eaecef;
+        color: #586069;
+        font-size: 0.9rem;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header-inner">
+        <a href="{{ '/' | relative_url }}" class="site-title">&larr; Back to {{ site.title }}</a>
+        <span style="font-size: 0.9rem; color: #586069;">Customer Engineer at Google</span>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <article class="post">
+        <header class="post-header">
+          <h1 class="post-title">{{ page.title }}</h1>
+          <div class="post-meta">
+            <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%B %d, %Y" }}</time>
+            {% if page.author %} &bull; {{ page.author }}{% endif %}
+          </div>
+        </header>
+
+        <div class="post-content">
+          {{ content }}
+        </div>
+      </article>
+    </main>
+
+    <footer class="post-footer">
+      <p>&copy; {{ 'now' | date: "%Y" }} {{ site.title }}. All rights reserved.</p>
+    </footer>
+  </body>
+</html>
