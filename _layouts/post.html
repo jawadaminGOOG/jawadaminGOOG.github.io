@@ -8,9 +8,10 @@
     <title>{{ page.title }} | {{ site.title }}</title>
     <meta name="description" content="{{ page.description | default: site.description }}">
 
-    <link rel="stylesheet" href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}">
-    
     <style>
+      * {
+        box-sizing: border-box;
+      }
       body {
         margin: 0;
         padding: 0;
@@ -18,11 +19,21 @@
         color: #24292e;
         background-color: #ffffff;
         line-height: 1.6;
+        font-size: 16px;
+      }
+      a {
+        color: #0366d6;
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
       }
       .site-header {
+        width: 100%;
         border-bottom: 1px solid #e1e4e8;
         padding: 16px 24px;
         background: #fafbfc;
+        position: relative;
       }
       .site-header-inner {
         max-width: 800px;
@@ -33,12 +44,8 @@
       }
       .site-title {
         font-weight: 600;
-        font-size: 1.1rem;
+        font-size: 1rem;
         color: #0366d6;
-        text-decoration: none;
-      }
-      .site-title:hover {
-        text-decoration: underline;
       }
       .main-content {
         max-width: 800px;
@@ -51,27 +58,48 @@
         border-bottom: 1px solid #eaecef;
       }
       .post-title {
-        font-size: 2.2rem;
+        font-size: 2.25rem;
         font-weight: 700;
         margin-top: 0;
-        margin-bottom: 8px;
+        margin-bottom: 12px;
         line-height: 1.25;
-        color: #1a1a1a;
+        color: #111827;
       }
       .post-meta {
         font-size: 0.95rem;
-        color: #586069;
+        color: #6b7280;
+      }
+      .post-content h1,
+      .post-content h2,
+      .post-content h3,
+      .post-content h4 {
+        color: #111827;
+        margin-top: 36px;
+        margin-bottom: 16px;
+        font-weight: 600;
       }
       .post-content h2 {
+        font-size: 1.5rem;
         border-bottom: 1px solid #eaecef;
         padding-bottom: 8px;
-        margin-top: 36px;
+      }
+      .post-content h3 {
+        font-size: 1.25rem;
+      }
+      .post-content p,
+      .post-content ul,
+      .post-content ol {
+        margin-top: 0;
+        margin-bottom: 16px;
       }
       .post-content pre {
         background-color: #f6f8fa;
         border-radius: 6px;
         padding: 16px;
-        overflow: auto;
+        overflow-x: auto;
+        font-size: 85%;
+        line-height: 1.45;
+        border: 1px solid #e1e4e8;
       }
       .post-content code {
         font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
@@ -84,12 +112,27 @@
         background-color: transparent;
         padding: 0;
       }
+      .post-content table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+      }
+      .post-content table th,
+      .post-content table td {
+        border: 1px solid #d0d7de;
+        padding: 8px 12px;
+        text-align: left;
+      }
+      .post-content table th {
+        background-color: #f6f8fa;
+        font-weight: 600;
+      }
       .post-footer {
         max-width: 800px;
         margin: 60px auto 40px;
         padding: 24px 24px 0;
         border-top: 1px solid #eaecef;
-        color: #586069;
+        color: #6b7280;
         font-size: 0.9rem;
         text-align: center;
       }
@@ -99,7 +142,7 @@
     <header class="site-header">
       <div class="site-header-inner">
         <a href="{{ '/' | relative_url }}" class="site-title">&larr; Back to {{ site.title }}</a>
-        <span style="font-size: 0.9rem; color: #586069;">Customer Engineer at Google</span>
+        <span style="font-size: 0.9rem; color: #6b7280;">Customer Engineer at Google</span>
       </div>
     </header>
 
@@ -109,7 +152,7 @@
           <h1 class="post-title">{{ page.title }}</h1>
           <div class="post-meta">
             <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%B %d, %Y" }}</time>
-            {% if page.author %} &bull; {{ page.author }}{% endif %}
+            {% if page.description %} &bull; {{ page.description }}{% endif %}
           </div>
         </header>
 
