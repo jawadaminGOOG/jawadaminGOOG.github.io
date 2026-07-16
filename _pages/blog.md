@@ -109,6 +109,10 @@ pagination:
       {% assign postlist = site.posts %}
     {% endif %}
 
+    {% if postlist.size == 0 %}
+      <p class="text-muted mt-4">No posts yet. Stay tuned!</p>
+    {% endif %}
+
     {% for post in postlist %}
 
     {% if post.external_source == blank %}
