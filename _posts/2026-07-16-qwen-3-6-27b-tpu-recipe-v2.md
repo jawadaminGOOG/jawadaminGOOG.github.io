@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Deploying a Code Harness with Qwen 3.6 27B on TPUs: 15X Cost Improvement over closed-source alternatives"
+title: "Cutting Coding Agent Costs by 15X: Serving Qwen 3.6 27B on Cloud TPUs"
 date: 2026-07-16
 description: "Notes, setup recipes, and commentary on serving Qwen 3.6 27B on Cloud TPUs and integrating with an agentic harness."
 tags: tpu qwen llm benchmark google-cloud
@@ -17,19 +17,19 @@ With this context in mind, this blog focuses on enabling Qwen 3.6 27B, a highly 
 
 # Context
 
-For this recipe, we start by picking Qwen 3.6 27B (the FP8 rendition). As stated earlier, there are three primary reasons behind this choice:
+For this recipe (available in full in our [qwen3.6-27b-tpu-recipe repository](https://github.com/jawadaminGOOG/qwen3.6-27b-tpu-recipe)), we start by picking Qwen 3.6 27B (the FP8 rendition). As stated earlier, there are three primary reasons behind this choice:
 
 * **(a) Dense Model Sizing & Deployment Flexibility:** This dense model at its sizing, particularly in FP8, is easy to deploy, maintain, and post-train—offering engineering teams flexibility and freedom to explore.
 * **(b) High Agentic Capability:** This model punches above its weight class in terms of agentic ability and instruction following as it pertains to SWE tasks, as evidenced by where it ranks in SWE-Bench compared to other higher weight-class models.
 * **(c) Ecosystem Adoption:** This model has had a lot of traction in public domains, leading to an abundance of serving and orchestration templates/hooks etc. which will make our effort more efficient.
 
-In terms of the hardware and inference serving stack, we focus on an acceptable-latency, throughput-optimized recipe running on TPU v6e. This approach is (a) to get around the demand of latest generation TPUs (e.g. TPU v7x) and GPUs (e.g. Blackwell), and (b) to achieve the most efficient performance-per-dollar frontier given price relief on older generations with every latest AI accelerator generation being released. We choose a 4-chip, chip-to-chip interconnected topology of TPU v6e chips with a storage disk for persistent model weight storage. We orchestrate via GKE (giving opportunity for scale-out for larger dev teams) and leverage vLLM for an optimized inference engine.
+In terms of the hardware and inference serving stack, we focus on an acceptable-latency, throughput-optimized recipe running on TPU v6e. This approach is (a) to get around the demand of latest generation TPUs (e.g. TPU v7x) and GPUs (e.g. Blackwell), and (b) to achieve the most efficient performance-per-dollar frontier given price relief on older generations with every latest AI accelerator generation being released. We choose a 4-chip, chip-to-chip interconnected topology of TPU v6e chips with a storage disk for persistent model weight storage. We orchestrate via GKE ([gke-base-infra](https://github.com/jawadaminGOOG/qwen3.6-27b-tpu-recipe/tree/main/gke-base-infra)) and leverage vLLM for an optimized inference engine.
 
 ---
 
 # Inference Optimizations
 
-It is important to spend some time highlighting the key optimizations for serving that we employed in this recipe. These are discussed below:
+It is important to spend some time highlighting the key optimizations for serving that we employed in this recipe (see the deployment manifests in [qwen-optimized-serving](https://github.com/jawadaminGOOG/qwen3.6-27b-tpu-recipe/tree/main/qwen-optimized-serving)). These are discussed below:
 
 * **(a) FP8 Weights and FP8 KV Cache:** We compressed both the weights and the KV cache tokens to 8-bit precision in HBM, enabling maximum concurrency capacity (i.e. number of developers) and context headroom (i.e. code/instruction size) for our TPU chips. FP8 compression for this class of models leads to <1% degradation in accuracy (ranging from 0.2% to 0.8% in major benchmarks).
 * **(b) Tensor Parallelism = 4 (Splitting Model Across 4 Chips):** We evenly shared the 27B dense model across all 4 chips of the TPU v6e-4 node over low-latency Inter-Chip Interconnect (ICI). This enables us to free up more High-Bandwidth Memory (HBM) for larger KV caches (enabling larger context lengths and more concurrency)—and the ICI connectivity ensures that we don't pay a large penalty with communication overhead across chips during `AllGather` and `ReduceScatter` collectives.
@@ -64,7 +64,7 @@ We also configure a server-side token parser to intercept and convert XML tool t
 
 Lastly, we enable dynamic tool choice, which the client can drive to either force `tool_choice` or leave it to the model as automatic.
 
-From an end-to-end recipe perspective, the proof is in the pudding in how well this integrates with an open-source harness. Therefore, we tested this recipe leveraging the open-source [Pi harness](https://pi.dev) with a variety of coding tasks to ensure that user experience is indeed seamless and intuitive, and capabilities such as tool calling, reasoning blocks, MCP integration, skills injection, context compaction etc. work effortlessly. The setup guide for Pi is included in the recipe repository.
+From an end-to-end recipe perspective, the proof is in the pudding in how well this integrates with an open-source harness. Therefore, we tested this recipe leveraging the open-source [Pi harness](https://pi.dev) with a variety of coding tasks to ensure that user experience is indeed seamless and intuitive, and capabilities such as tool calling, reasoning blocks, MCP integration, skills injection, context compaction etc. work effortlessly. Setup guides are included in the recipe repository under [pi-harness-integration](https://github.com/jawadaminGOOG/qwen3.6-27b-tpu-recipe/tree/main/pi-harness-integration) and [agi-harness-integration](https://github.com/jawadaminGOOG/qwen3.6-27b-tpu-recipe/tree/main/agi-harness-integration).
 
 ---
 
