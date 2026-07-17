@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% if page.title %}{{ page.title }} — {% endif %}{{ site.title }}</title>
+  <meta name="description" content="{{ page.description | default: site.description }}">
+  <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+</head>
+<body>
+  <button class="menubtn" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰ Menu</button>
+
+  <aside class="sidebar">
+    <div class="brand">
+      <h1><a href="{{ '/' | relative_url }}">Jawad Amin</a></h1>
+      <div class="sub">Customer Engineer @ Google | AI Infra</div>
+    </div>
+
+    <nav>
+      <div class="glabel">Navigation</div>
+      <a href="{{ '/' | relative_url }}" {% if page.url == '/' or page.layout == 'post' %}class="active"{% endif %}>Blogs</a>
+      <a href="https://github.com/jawadaminGOOG?tab=repositories" target="_blank">Repositories ↗</a>
+
+      <div class="glabel">Recent Posts</div>
+      {% for post in site.posts limit:5 %}
+        <a href="{{ post.url | relative_url }}">{{ post.title | truncate: 45 }}</a>
+      {% endfor %}
+    </nav>
+
+    <div class="sidefoot">
+      <p><a href="https://github.com/jawadaminGOOG" target="_blank">GitHub</a> &bull; <a href="https://ca.linkedin.com/in/jawadamin" target="_blank">LinkedIn</a></p>
+    </div>
+  </aside>
+
+  <div class="main">
+    <main class="content">
+      {{ content }}
+    </main>
+  </div>
+</body>
+</html>

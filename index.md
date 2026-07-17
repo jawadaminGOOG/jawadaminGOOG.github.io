@@ -1,3 +1,8 @@
+---
+layout: default
+title: Home
+---
+
 # Jawad Amin
 
 **Customer Engineer at Google | AI Infrastructure**
@@ -7,6 +12,7 @@ Welcome to my personal site for AI hardware benchmarking, TPU recipes, and engin
 ---
 
 ## Blogs & Notes
+
 {% for post in site.posts %}
 * **[{{ post.date | date: "%B %d, %Y" }}]** — [{{ post.title }}]({{ post.url | relative_url }})
   <br><sub>{{ post.description }}</sub>
@@ -17,9 +23,10 @@ Welcome to my personal site for AI hardware benchmarking, TPU recipes, and engin
 ---
 
 ## Public Repositories
-* **[qwen3.6-27b-tpu-recipe](https://github.com/jawadaminGOOG/qwen3.6-27b-tpu-recipe)**  
-  *Benchmarking infrastructure and setup recipes for serving Qwen 3.6 27B on Cloud TPUs.*
-* **[jawadaminGOOG.github.io](https://github.com/jawadaminGOOG/jawadaminGOOG.github.io)**  
-  *Personal homepage and engineering notes source repository.*
 
-[View all public repositories directly on GitHub](https://github.com/jawadaminGOOG?tab=repositories)
+* **[qwen3.6-27B-tpu-pi-agent](https://github.com/jawadaminGOOG/qwen3.6-27B-tpu-pi-agent)**  
+  Benchmarking infrastructure and setup recipes for serving Qwen 3.6 27B on Cloud TPUs.
+* **[jawadaminGOOG.github.io](https://github.com/jawadaminGOOG/jawadaminGOOG.github.io)**  
+  Personal homepage and engineering notes source repository.
+
+[View all public repositories directly on GitHub ↗](https://github.com/jawadaminGOOG?tab=repositories)
