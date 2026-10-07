@@ -27,7 +27,7 @@ a{color:var(--color-text)}a:hover{color:var(--color-accent-700)}
 
 <sc-if value="{{ isGallery }}" hint-placeholder-val="{{ true }}">
 <div data-screen-label="Landing" style="min-height:100vh;display:flex;flex-direction:column;animation:fadein .45s ease both">
-  <header style="width:100%;max-width:1240px;margin:0 auto;box-sizing:border-box;display:flex;justify-content:space-between;align-items:center;gap:24px;padding:36px 64px 0">
+  <header style="width:100%;max-width:1240px;margin:0 auto;box-sizing:border-box;display:flex;justify-content:space-between;align-items:center;gap:24px;padding:{{ topPad }}">
     <span style="font:400 19px/1 var(--font-heading)">Jawad Amin</span>
     <div style="display:flex;gap:16px"><a href="https://github.com/jawadaminGOOG" style="font-size:14px;text-decoration:none">GitHub</a><a href="https://ca.linkedin.com/in/jawadamin" style="font-size:14px;text-decoration:none">LinkedIn</a></div>
   </header>
@@ -36,7 +36,7 @@ a{color:var(--color-text)}a:hover{color:var(--color-accent-700)}
       <div style="display:flex;flex-direction:column;align-items:flex-start;gap:22px;max-width:400px">
         <h1 style="margin:0;font:400 60px/.9 var(--font-heading);letter-spacing:-.02em">Work</h1>
         <div style="display:flex;flex-direction:column;gap:8px">
-          <span style="font: 400 17px/1.25 var(--font-heading); width: 439px; height: 30px">Customer Engineer at Google | AI Infrastructure</span>
+          <span style="font: 400 17px/1.25 var(--font-heading); max-width: 439px; text-wrap: balance">Customer Engineer at Google | AI Infrastructure</span>
           <p style="margin:0;font-size:14px;line-height:1.5;color:var(--color-neutral-700);text-wrap:pretty">Welcome to my personal site for AI hardware benchmarking, TPU recipes, and engineering notes.</p>
         </div>
         <div role="group" aria-label="Filter work" style="display:flex;flex-wrap:wrap;gap:8px 22px">
@@ -605,6 +605,12 @@ class Component extends DCLogic {
         t1: h ? `translate(${12 * fan}px, ${-7 * fan}px) rotate(${3.5 * fan}deg)` : 'translate(5px,-5px) rotate(0.8deg)',
         t2: h ? `translate(${24 * fan}px, ${-12 * fan}px) rotate(${7 * fan}deg)` : 'translate(10px,-10px) rotate(1.6deg)' } });
     });
+    if (wide) {
+      let col = 0, last = null;
+      const fill = () => { if (last && last.isBlog && col) last.span = 'span ' + (2 + 3 - col); col = 0; last = null; };
+      tiles.forEach(t => { if (t.isRun) return fill(); const w = t.isBlog ? 2 : 1; if (col + w > 3) col = 0; col += w; last = t; if (col === 3) { col = 0; last = null; } });
+      fill();
+    }
     const filters = ['All', 'Decks', 'Blogs', 'Repositories'].map(t => {
       const a = t === filter;
       return { label: t, pressed: a ? 'true' : 'false', op: a ? 1 : 0.38, wOp: a ? 1 : 0.6, sw: a ? 'var(--color-text)' : 'transparent', swEdge: a ? 'var(--color-text)' : 'var(--color-neutral-400)', countBg: a ? 'rgba(255,253,249,.18)' : '#f3eee4',
@@ -648,7 +654,7 @@ class Component extends DCLogic {
     return {
       isGallery: view === 'gallery', introW: (this.props.introStyle ?? 'Wada') === 'Wada', ink: this.inkVals, inkRef: this.inkRef, inkMoveH: this.inkMoveH, inkLeave: this.inkLeaveH, wada: { op: this.state.wOn ? 1 : 0, c0: this.combo[0], c1: this.combo[1], c2: this.combo[2], c3: this.combo[3] }, introA: this.props.introStyle === 'Statement',
       wadaCols: wide ? 'minmax(0, 1fr) auto' : 'minmax(0, 1fr)', swW: wide ? 'min(420px, 36vw)' : '100%', swH: wide ? '220px' : '150px', introB: this.props.introStyle === 'Index', introC: this.props.introStyle === 'Panel',
-      introPad: wide ? '72px 64px 0' : '40px 24px 0', introPadC: wide ? '40px 64px 0' : '24px 20px 0', panelPad: wide ? '44px 48px' : '28px 24px', isViewer: view === 'viewer', isPost: view === 'post', scrollRef: this.scrollRef,
+      introPad: wide ? '72px 64px 0' : '40px 24px 0', topPad: wide ? '36px 64px 0' : '24px 24px 0', introPadC: wide ? '40px 64px 0' : '24px 20px 0', panelPad: wide ? '44px 48px' : '28px 24px', isViewer: view === 'viewer', isPost: view === 'post', scrollRef: this.scrollRef,
       post: this.D.find(x => x.id === postId) || this.D.find(x => x.type === 'blog'),
       heroWrapPad: wide ? '0 64px' : '0 20px', heroPad: wide ? '64px 64px 56px' : '40px 24px 32px', heroTextW: wide ? '78%' : '100%', wide, narrow: !wide,
       scrollY: (view === 'gallery' && !fits) || view === 'post' ? 'auto' : 'hidden', gridAlign: fits ? 'center' : 'start',
