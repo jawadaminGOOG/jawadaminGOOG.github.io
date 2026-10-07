@@ -32,8 +32,8 @@ a{color:var(--color-text)}a:hover{color:var(--color-accent-700)}
     <div style="display:flex;gap:16px"><a href="https://github.com/jawadaminGOOG" style="font-size:14px;text-decoration:none">GitHub</a><a href="https://ca.linkedin.com/in/jawadamin" style="font-size:14px;text-decoration:none">LinkedIn</a></div>
   </header>
   <sc-if value="{{ introW }}" hint-placeholder-val="{{ true }}">
-    <div style="width:100%;max-width:1240px;margin:0 auto;box-sizing:border-box;display:grid;grid-template-columns:{{ wadaCols }};align-items:end;gap:36px 64px;padding:{{ introPad }}">
-      <div style="display:flex;flex-direction:column;align-items:flex-start;gap:22px;max-width:400px">
+    <div style="width:100%;max-width:1240px;margin:0 auto;box-sizing:border-box;position:relative;display:grid;grid-template-columns:{{ wadaCols }};align-items:end;gap:36px 64px;padding:{{ introPad }}">
+      <div style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:flex-start;gap:22px;max-width:400px">
         <h1 style="margin:0;font:400 60px/.9 var(--font-heading);letter-spacing:-.02em">Work</h1>
         <div style="display:flex;flex-direction:column;gap:8px">
           <span style="font: 400 17px/1.25 var(--font-heading); width: min(439px, calc(100vw - 48px)); min-height: 30px">Customer Engineer at Google | AI Infrastructure</span>
@@ -45,7 +45,7 @@ a{color:var(--color-text)}a:hover{color:var(--color-accent-700)}
           </sc-for>
         </div>
       </div>
-      <div aria-hidden="true" ref="{{ inkRef }}" onMouseMove="{{ inkMoveH }}" onMouseLeave="{{ inkLeave }}" style="position:relative;width:{{ swW }};height:{{ swH }};justify-self:end;isolation:isolate">
+      <div aria-hidden="true" ref="{{ inkRef }}" onMouseMove="{{ inkMoveH }}" onMouseLeave="{{ inkLeave }}" onTouchMove="{{ inkTouchH }}" onTouchEnd="{{ inkLeave }}" style="position:{{ swPos }};top:{{ swTop }};right:{{ swRight }};width:{{ swW }};height:{{ swH }};justify-self:end;isolation:isolate">
         <sc-for list="{{ ink }}" as="k" hint-placeholder-count="0">
           <span data-ink="{{ k.j }}" style="position:absolute;left:{{ k.x }};top:{{ k.y }};width:{{ k.s }};aspect-ratio:1;translate:-50% -50%;opacity:.94;mix-blend-mode:darken;animation:inkDrop {{ k.dur }} cubic-bezier(.16,.9,.24,1) {{ k.delay }} both">
             <sc-for list="{{ k.halves }}" as="hf" hint-placeholder-count="1">
@@ -358,6 +358,7 @@ class Component extends DCLogic {
   phys = null;
   inkMoveH = e => this.onInkMove(e);
   inkLeaveH = () => this.onInkLeave();
+  inkTouchH = e => { const t = e.touches && e.touches[0]; if (t) this.onInkMove(t); };
   EMPTY = 'polygon(0% 0%, 0% 0%, 0% 0%)';
   inkVals = this.ink.map((k, j) => ({ ...k, j, x: (k.cx / 420 * 100).toFixed(2) + '%', y: (k.cy / 220 * 100).toFixed(2) + '%',
     halves: k.main ? [0, 1, 2, 3, 4, 5, 6, 7].map(i => ({ i, clip: i ? this.EMPTY : 'none' })) : [{ i: 0, clip: 'none' }] }));
@@ -665,7 +666,7 @@ class Component extends DCLogic {
 
     return {
       isGallery: view === 'gallery', introW: (this.props.introStyle ?? 'Wada') === 'Wada', ink: this.inkVals, inkRef: this.inkRef, inkMoveH: this.inkMoveH, inkLeave: this.inkLeaveH, wada: { op: this.state.wOn ? 1 : 0, c0: this.combo[0], c1: this.combo[1], c2: this.combo[2], c3: this.combo[3] }, introA: this.props.introStyle === 'Statement',
-      wadaCols: wide ? 'minmax(0, 1fr) auto' : 'minmax(0, 1fr)', swW: wide ? 'min(420px, 36vw)' : '100%', swH: wide ? '220px' : '150px', introB: this.props.introStyle === 'Index', introC: this.props.introStyle === 'Panel',
+      wadaCols: wide ? 'minmax(0, 1fr) auto' : 'minmax(0, 1fr)', swW: wide ? 'min(420px, 36vw)' : 'min(41vw, 200px)', swH: wide ? '220px' : 'calc(min(41vw, 200px) * 220 / 420)', swPos: wide ? 'relative' : 'absolute', swTop: wide ? 'auto' : '22px', swRight: wide ? 'auto' : '14px', inkTouchH: this.inkTouchH, introB: this.props.introStyle === 'Index', introC: this.props.introStyle === 'Panel',
       introPad: wide ? '72px 64px 0' : '40px 24px 0', topPad: wide ? '36px 64px 0' : '24px 24px 0', introPadC: wide ? '40px 64px 0' : '24px 20px 0', panelPad: wide ? '44px 48px' : '28px 24px', isViewer: view === 'viewer', isPost: view === 'post', scrollRef: this.scrollRef,
       post: this.D.find(x => x.id === postId) || this.D.find(x => x.type === 'blog'),
       heroWrapPad: wide ? '0 64px' : '0 20px', heroPad: wide ? '64px 64px 56px' : '40px 24px 32px', heroTextW: wide ? '78%' : '100%', wide, narrow: !wide,
