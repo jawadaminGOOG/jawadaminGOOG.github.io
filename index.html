@@ -116,7 +116,7 @@ a{color:var(--color-text)}a:hover{color:var(--color-accent-700)}
   <div style="flex:1;width:100%;max-width:1240px;margin:0 auto;box-sizing:border-box;display:grid;grid-template-columns:{{ cols }};align-content:{{ gridAlign }};align-items:start;justify-items:center;gap:{{ gridGap }};padding:{{ gridPad }}">
     <sc-for list="{{ tiles }}" as="t" hint-placeholder-count="3">
       <sc-if value="{{ t.isDeck }}" hint-placeholder-val="{{ true }}">
-      <div style="position:relative;width:{{ t.d.w }};translate:{{ t.d.x }} {{ t.d.y }};z-index:{{ t.d.z }};opacity:{{ t.d.dim }};filter:{{ t.d.blur }};pointer-events:{{ t.d.pe }};transition:opacity .5s, filter .5s">
+      <div style="position:relative;align-self:{{ t.align }};width:{{ t.d.w }};translate:{{ t.d.x }} {{ t.d.y }};z-index:{{ t.d.z }};opacity:{{ t.d.dim }};filter:{{ t.d.blur }};pointer-events:{{ t.d.pe }};transition:opacity .5s, filter .5s">
         <div style="animation:drift {{ t.d.dur }} ease-in-out {{ t.d.delay }} infinite">
           <div data-deck="{{ t.d.id }}" role="button" tabIndex="{{ t.d.tab }}" aria-label="Open {{ t.d.title }}" onClick="{{ t.d.open }}" onKeyDown="{{ t.d.key }}" onMouseEnter="{{ t.d.enter }}" onMouseLeave="{{ t.d.leave }}" onFocus="{{ t.d.enter }}" onBlur="{{ t.d.leave }}" style="cursor:pointer;display:flex;flex-direction:column;gap:14px;border-radius:14px;transform:{{ t.d.lift }};transition:transform .5s cubic-bezier(.2,.8,.2,1)">
             <div data-thumb="1" style="position:relative;aspect-ratio:16/9">
@@ -610,7 +610,7 @@ class Component extends DCLogic {
         return;
       }
       const n = d.slides.length;
-      tiles.push({ isDeck: true, isBlog: false, isRun: false, d: { ...base, neutral: neutralOf(d), front: d.slides[tick % n], count: n, w: blockW, meta: n + ' slides',
+      tiles.push({ isDeck: true, isBlog: false, isRun: false, align: 'auto', d: { ...base, neutral: neutralOf(d), front: d.slides[tick % n], count: n, w: blockW, meta: n + ' slides',
         open: e => this.open(d.id, e.currentTarget),
         key: e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.open(d.id, e.currentTarget); } },
         lift: h ? 'rotate(0deg) scale(1.05)' : `rotate(${wide ? d.rot : 0}deg)`,
@@ -619,10 +619,23 @@ class Component extends DCLogic {
         t2: h ? `translate(${24 * fan}px, ${-12 * fan}px) rotate(${7 * fan}deg)` : 'translate(10px,-10px) rotate(1.6deg)' } });
     });
     if (wide) {
-      let col = 0, last = null;
-      const fill = () => { if (last && last.isBlog && col) last.span = 'span ' + (2 + 3 - col); col = 0; last = null; };
-      tiles.forEach(t => { if (t.isRun) return fill(); const w = t.isBlog ? 2 : 1; if (col + w > 3) col = 0; col += w; last = t; if (col === 3) { col = 0; last = null; } });
-      fill();
+      // Pack decks (1 col) and blogs (2 cols) into full 3-col rows: pair each deck with the next blog,
+      // alternating sides row by row; a leftover blog stretches to fill its row.
+      const packed = []; let seg = [], row = 0;
+      const flush = () => {
+        while (seg.length) {
+          const t = seg.shift(), cells = [t];
+          const mate = seg.findIndex(x => x.isBlog !== t.isBlog);
+          if (mate >= 0) cells.push(seg.splice(mate, 1)[0]);
+          else if (t.isDeck) { while (cells.length < 3 && seg.length) cells.push(seg.shift()); }
+          if (cells.length === 2 && cells[0].isBlog !== cells[1].isBlog) { const [deck, blog] = cells[0].isDeck ? cells : [cells[1], cells[0]]; blog.span = 'span 2'; deck.align = 'center'; packed.push(...(row % 2 ? [blog, deck] : [deck, blog])); }
+          else { if (cells[0].isBlog) cells[0].span = '1 / -1'; packed.push(...cells); }
+          row++;
+        }
+      };
+      tiles.forEach(t => { if (t.isRun) { flush(); packed.push(t); } else seg.push(t); });
+      flush();
+      tiles.splice(0, tiles.length, ...packed);
     }
     const filters = ['All', 'Decks', 'Blogs', 'Repositories'].map(t => {
       const a = t === filter;
